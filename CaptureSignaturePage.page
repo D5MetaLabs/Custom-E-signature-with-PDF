@@ -1,0 +1,124 @@
+<!--- Page Responsible for Capture Customer Name, Signature through Canvas :Compatible for Mobile and Desktop -->
+
+<apex:page Controller="QuotePDFWithSignatureController">
+    <apex:form id="form">
+        <apex:pageBlock >
+         <apex:pageBlockSection title="Quote Information">
+           <table style="width: 100%; border-collapse: collapse;">
+           <tr style="border-bottom: 1px solid #ccc;">
+               <td style="padding: 10px; font-weight: bold; width: 30%;">Quote Name:</td>
+               <td style="padding: 10px;">{!quote.Name}</td>
+           </tr>
+           <tr style="border-bottom: 1px solid #ccc;">
+               <td style="padding: 10px; font-weight: bold;">Customer Name:</td>
+               <apex:inputText value="{!customerName}" />
+           </tr>
+            <tr>
+              <td style="padding: 10px; font-weight: bold;">Current Date:</td>
+              <td style="padding: 10px;">{!currentDate}</td>
+            </tr>
+            </table>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Clear" onclick="clearCanvas(); return false;"  />
+                <apex:commandButton value="Preview" onclick="saveCanvasData();" action="{!saveSignatureAndGeneratePDF}" />
+            </apex:pageBlockButtons>
+            <apex:pageMessages id="messages" />
+            <apex:pageBlockSection title="Signature">
+                <canvas id="canvas" style="border:1px solid #000000; Width: 300px"></canvas>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <script>
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 200;
+            var drawing = false;
+
+            function getMousePos(event) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: event.clientX - rect.left,
+                    y: event.clientY - rect.top
+                };
+            }
+
+            function getTouchPos(touch) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: touch.clientX - rect.left,
+                    y: touch.clientY - rect.top
+                };
+            }
+
+            canvas.addEventListener('mousedown', function(event) {
+                drawing = true;
+                draw(event);
+            });
+
+            canvas.addEventListener('mouseup', function() {
+                drawing = false;
+                ctx.beginPath();
+            });
+
+            canvas.addEventListener('mousemove', draw);
+
+            canvas.addEventListener('touchstart', function(event) {
+                drawing = true;
+                drawTouch(event.touches[0]);
+                event.preventDefault();
+            });
+
+            canvas.addEventListener('touchend', function() {
+                drawing = false;
+                ctx.beginPath();
+            });
+
+            canvas.addEventListener('touchmove', function(event) {
+                drawTouch(event.touches[0]);
+                event.preventDefault();
+            });
+
+            function draw(event) {
+                if (!drawing) return;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000000';
+
+                var pos = getMousePos(event);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function drawTouch(touch) {
+                if (!drawing) return;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000000';
+
+                var pos = getTouchPos(touch);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function getCanvasData() {
+                return canvas.toDataURL('image/png');
+            }
+
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            function saveCanvasData() {
+                var canvasData = getCanvasData();
+                document.getElementById('signatureDataInput').value = canvasData;
+            }
+        </script>
+        <input type="hidden" id="signatureDataInput" name="signatureDataInput" value="" />
+    </apex:form>
+</apex:page>

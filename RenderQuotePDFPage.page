@@ -1,0 +1,43 @@
+<!-- This Page is Responsible for Rendering/Generating Pdf with Signature and input details -->
+
+<apex:page controller="QuotePDFWithSignatureController">
+    <apex:variable value="{!$CurrentPage.parameters.contentVersionId}" var="contentVersionId" />
+    <apex:variable value="{!$CurrentPage.parameters.signatureUrl}" var="signatureUrl" />
+    <apex:variable value="{!$CurrentPage.parameters.customerName}" var="customerName" />
+    
+   
+    <apex:form id="form">
+        <table width="100%">
+            <tr>
+                <td align="center">
+                    <h1>Quote Details</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table width="100%" cellpadding="5" cellspacing="0">
+                        <tr>
+                            <td style="font-weight: bold;">Quote Name:</td>
+                            <td>{!quote.Name}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Current Date:</td>
+                            <td>{!currentDate}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Customer Name:</td>
+                            <td>{!$CurrentPage.parameters.customerName}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td align="left">
+                    <label>Signature</label>
+                    <apex:image url="{!$CurrentPage.parameters.signatureUrl}" width="200px" height="100px" />
+                </td>
+            </tr>
+        </table>
+        <apex:commandButton value="Generate PDF" action="{!generateAndSavePDF}" styleClass="generate-pdf-btn" />
+    </apex:form>
+</apex:page>
